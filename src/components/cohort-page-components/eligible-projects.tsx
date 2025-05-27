@@ -35,7 +35,7 @@ export const EligibleProjects = () => {
           with membership typically lasting eight months.
         </span>
       </div>
-      <div className="grid grid-cols-4 md:grid-cols-8 gap-y-4 gap-x-6">
+      <div className="grid grid-cols-4 md:grid-cols-12 gap-y-4 gap-x-6">
         {projects.map((project) => (
           <div key={project.id} className="col-span-4">
             <ProjectCard
