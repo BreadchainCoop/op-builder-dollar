@@ -7,7 +7,8 @@ import { Client, Provider, cacheExchange, fetchExchange } from "urql";
 import { http, WagmiProvider, createConfig } from "wagmi";
 import { mainnet, optimism, sepolia } from "wagmi/chains";
 
-const walletConnectProjectId = "6d9de7a0140c0e30f0c302f820446d2b";
+const walletConnectProjectId =
+  process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || "";
 
 const config = createConfig(
   getDefaultConfig({
