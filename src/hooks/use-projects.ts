@@ -87,6 +87,13 @@ export function useProjects(): Partial<Project>[] {
         }
       }
 
+      const projectsWithNames = newProjects.filter(
+        (p) => p.name && p.name.trim() !== "",
+      );
+      console.log(
+        `[DEBUG] useProjects: Final projects with names: ${projectsWithNames.length}/${newProjects.length}`,
+      );
+
       return newProjects as Partial<Project>[];
     },
   });
