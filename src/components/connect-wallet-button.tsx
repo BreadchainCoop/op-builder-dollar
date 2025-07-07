@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ChainIcon } from "@/components/ui/chain-icon";
 import { useApy } from "@/hooks/use-apy";
 import { useReadObusd } from "@/hooks/use-read-obusd";
-import { ConnectKitButton, useModal } from "connectkit";
+import { ConnectButton, useChainModal } from "@rainbow-me/rainbowkit";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -51,7 +51,7 @@ export const ConnectWalletButton = () => {
       : "0.0";
   const [open, setOpen] = useState(false);
 
-  const { openSwitchNetworks } = useModal();
+  const { openChainModal } = useChainModal();
 
   const handleMouseEnter = () => {
     if (isMobile) return;
@@ -64,85 +64,107 @@ export const ConnectWalletButton = () => {
   };
 
   return (
-    <ConnectKitButton.Custom>
-      {({ show, isConnected, isConnecting, truncatedAddress, chain }) => (
-        <>
-          {isConnected ? (
-            <div className="relative">
-              <Popover open={open} onOpenChange={setOpen}>
-                <div
-                  className="relative"
-                  onMouseEnter={handleMouseEnter}
-                  onMouseLeave={handleMouseLeave}
-                >
-                  <PopoverTrigger
-                    onClick={(e) => {
-                      !isMobile && e.preventDefault();
-                    }}
-                    className="focus:outline-none"
+    <ConnectButton.Custom>
+      {({
+        account,
+        chain,
+        openConnectModal,
+        authenticationStatus,
+        mounted,
+      }) => {
+        const ready = mounted;
+        const truncatedAddress = account?.displayName;
+        return (
+          <>
+            {ready &&
+            account &&
+            chain &&
+            (!authenticationStatus ||
+              authenticationStatus === "authenticated") ? (
+              <div className="relative">
+                <Popover open={open} onOpenChange={setOpen}>
+                  <div
+                    className="relative"
+                    onMouseEnter={handleMouseEnter}
+                    onMouseLeave={handleMouseLeave}
                   >
-                    <div className="flex items-center justify-center gap-2 border border-card-border rounded-2xl md:pl-3">
-                      <div className="hidden md:flex items-center gap-1.5">
-                        <ChainIcon id={chain?.id} size={24} />
-                        <span className="text-lg">{chain?.name}</span>
+                    <PopoverTrigger
+                      onClick={(e) => {
+                        !isMobile && e.preventDefault();
+                      }}
+                      className="focus:outline-none"
+                    >
+                      <div className="flex items-center justify-center gap-2 border border-card-border rounded-2xl md:pl-3">
+                        <div className="hidden md:flex items-center gap-1.5">
+                          <ChainIcon id={chain?.id} size={24} />
+                          <span className="text-lg">{chain?.name}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 md:bg-background text-foreground rounded-2xl py-2 px-2">
+                          {avatar && (
+                            <Image
+                              loader={() => avatar}
+                              src={avatar}
+                              alt="avatar"
+                              width={24}
+                              height={24}
+                              className="rounded-full"
+                            />
+                          )}
+                          <span>{ensName ?? truncatedAddress ?? ""}</span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1.5 md:bg-background text-foreground rounded-2xl py-2 px-2">
-                        {avatar && (
-                          <Image
-                            loader={() => avatar}
-                            src={avatar}
-                            alt="avatar"
-                            width={24}
-                            height={24}
-                            className="rounded-full"
-                          />
-                        )}
-                        <span>{ensName ?? truncatedAddress ?? ""}</span>
-                      </div>
-                    </div>
-                  </PopoverTrigger>
-                  {/* Invisible connector between trigger and content to keep the hover functionallity working */}
-                  {open && (
-                    <div className="absolute w-full h-6 bottom-0 translate-y-full" />
-                  )}
-                </div>
-                <PopoverContent
-                  side="top"
-                  sideOffset={20}
-                  className="w-[400px] md:w-[400px] md:h-[318px] mx-5"
-                  onMouseEnter={handleMouseEnter}
-                  onMouseLeave={handleMouseLeave}
-                >
-                  <WalletAccountDetails
-                    chainId={chain?.id}
-                    chainName={chain?.name}
-                    accountIdentifier={ensName ?? truncatedAddress ?? ""}
-                    avatar={avatar ?? undefined}
-                    balance={
-                      balance?.value !== undefined
-                        ? balance.value.toString() === "0"
-                          ? "0.0"
-                          : Number(formatEther(balance.value)).toFixed(4)
-                        : ""
-                    }
-                    userYearlyYield={userYearlyYield}
-                    openSwitchNetworks={openSwitchNetworks}
-                    address={address}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-          ) : (
-            <Button
-              onClick={isConnecting ? () => {} : show}
-              className="flex items-center gap-1.5 rounded-2xl py-2 px-6 text-lg font-normal"
-            >
-              <span>{isConnecting ? "Loading..." : "Sign in"}</span>
-            </Button>
-          )}
-        </>
-      )}
-    </ConnectKitButton.Custom>
+                    </PopoverTrigger>
+                    {/* Invisible connector between trigger and content to keep the hover functionallity working */}
+                    {open && (
+                      <div className="absolute w-full h-6 bottom-0 translate-y-full" />
+                    )}
+                  </div>
+                  <PopoverContent
+                    side="top"
+                    sideOffset={20}
+                    className="w-[400px] md:w-[400px] md:h-[318px] mx-5"
+                    onMouseEnter={handleMouseEnter}
+                    onMouseLeave={handleMouseLeave}
+                  >
+                    <WalletAccountDetails
+                      chainId={chain?.id}
+                      chainName={chain?.name}
+                      accountIdentifier={ensName ?? truncatedAddress ?? ""}
+                      avatar={avatar ?? undefined}
+                      balance={
+                        balance?.value !== undefined
+                          ? balance.value.toString() === "0"
+                            ? "0.0"
+                            : Number(formatEther(balance.value)).toFixed(4)
+                          : ""
+                      }
+                      userYearlyYield={userYearlyYield}
+                      openSwitchNetworks={openChainModal}
+                      address={address}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            ) : (
+              <Button
+                onClick={
+                  authenticationStatus === "loading"
+                    ? () => {}
+                    : openConnectModal
+                }
+                className="flex items-center gap-1.5 rounded-2xl py-2 px-6 text-lg font-normal"
+              >
+                <span>
+                  {authenticationStatus === "loading"
+                    ? "Loading..."
+                    : "Sign in"}
+                </span>
+              </Button>
+            )}
+          </>
+        );
+      }}
+    </ConnectButton.Custom>
   );
 };
 

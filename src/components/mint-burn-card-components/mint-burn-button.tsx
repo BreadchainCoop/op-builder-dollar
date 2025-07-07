@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { ConnectKitButton } from "connectkit";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { Butterfly, Fire } from "phosphor-react";
 import { useAccount, useSwitchChain } from "wagmi";
 import { Button } from "../ui/button";
@@ -33,13 +33,13 @@ export const MintBurnButton = ({
   // No wallet connected
   if (!address) {
     return (
-      <ConnectKitButton.Custom>
-        {({ show }) => (
-          <Button onClick={show} className={buttonClassName}>
+      <ConnectButton.Custom>
+        {({ openConnectModal }) => (
+          <Button onClick={openConnectModal} className={buttonClassName}>
             SIGN IN
           </Button>
         )}
-      </ConnectKitButton.Custom>
+      </ConnectButton.Custom>
     );
   }
 
