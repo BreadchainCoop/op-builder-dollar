@@ -5,7 +5,7 @@ import { useReadObusd } from "@/hooks/use-read-obusd";
 import { cn } from "@/lib/utils";
 import { useThemeStore } from "@/store/use-theme-store";
 import { formatTokenBalance } from "@/utils/formatting";
-import { useModal } from "connectkit";
+import { useChainModal } from "@rainbow-me/rainbowkit";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -59,7 +59,7 @@ const Header = () => {
           100
         ).toFixed(2)
       : "0.0";
-  const { openSwitchNetworks, setOpen: setConnectKitOpen } = useModal();
+  const { openChainModal } = useChainModal();
 
   const accountIdentifier =
     ensName ??
@@ -67,11 +67,15 @@ const Header = () => {
     "";
 
   const handleMouseEnter = () => {
-    setOpen(true);
+    if (!isMobile) {
+      setOpen(true);
+    }
   };
 
   const handleMouseLeave = () => {
-    setOpen(false);
+    if (!isMobile) {
+      setOpen(false);
+    }
   };
 
   useEffect(() => {
@@ -85,12 +89,7 @@ const Header = () => {
 
   if (isMobile)
     return (
-      <div
-        className="z-50 h-0 mb-[-24px]"
-        onMouseLeave={() => {
-          if (mobileWalletOpen || mobileOptionsOpen) closeMobilePopovers();
-        }}
-      >
+      <div className="z-50 h-0 mb-[-24px]">
         <header
           className={cn(
             "z-50 flex flex-col items-center justify-start relative h-fit bg-content mx-4 mt-6 px-3 rounded-3xl shadow-lg",
@@ -126,7 +125,7 @@ const Header = () => {
               ) : (
                 <Button
                   onClick={() => {
-                    setConnectKitOpen(true);
+                    openChainModal;
                   }}
                   className="flex items-center gap-1.5 rounded-2xl py-2 px-6 text-lg font-normal"
                 >
@@ -156,7 +155,7 @@ const Header = () => {
                     : ""
                 }
                 userYearlyYield={userYearlyYield}
-                openSwitchNetworks={openSwitchNetworks}
+                openSwitchNetworks={openChainModal}
                 address={address}
                 closeMenu={() => {
                   setMobileWalletOpen(false);
@@ -276,6 +275,8 @@ const Header = () => {
               <PopoverContent
                 className="px-6 py-3 border border-card-border bg-content flex flex-col items-start mt-5 mr-5"
                 sideOffset={5}
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
               >
                 <span className="text-2xl font-bold">Theme</span>
                 <p className="text-base text-sub-text mb-2">
