@@ -1,6 +1,10 @@
 "use client";
 
-import { RainbowKitProvider, getDefaultConfig } from "@rainbow-me/rainbowkit";
+import {
+  RainbowKitProvider,
+  darkTheme,
+  getDefaultConfig,
+} from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { Client, Provider, cacheExchange, fetchExchange } from "urql";
@@ -18,6 +22,14 @@ if (
     "WalletConnect Project ID not configured. Please set NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID environment variable.",
   );
 }
+
+const baseTheme = darkTheme({
+  accentColor: "#ff0420",
+  accentColorForeground: "#ff0420",
+  borderRadius: "small",
+  fontStack: "system",
+  overlayBlur: "small",
+});
 
 const config = getDefaultConfig({
   appName: "Optimistic Builders Dollar",
@@ -44,7 +56,7 @@ export const Web3Provider = ({ children }: { children: ReactNode }) => {
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
         <Provider value={graphqlClient}>
-          <RainbowKitProvider modalSize="compact">
+          <RainbowKitProvider modalSize="compact" theme={baseTheme}>
             {children}
           </RainbowKitProvider>
         </Provider>
