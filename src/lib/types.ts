@@ -9,12 +9,13 @@ export interface EligibleProject {
   id: string;
   recipient: string;
   refUid: string;
-  name: string;
-  description: string;
-  projectLinks: ProjectLink[];
-  socialLinks: { website: string[] };
+  name?: string;
+  description?: string;
+  projectLinks?: ProjectLink[];
+  socialLinks?: { website: string[] };
   endorsers: EndorserType[];
   isCohortMember: boolean;
+  isLoading?: boolean;
 }
 
 export interface CohortProject extends EligibleProject {

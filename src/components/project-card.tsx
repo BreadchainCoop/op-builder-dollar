@@ -26,6 +26,11 @@ export const ProjectCard = ({
             <div className="max-w-[250px] w-full h-8 rounded-md bg-card-border animate-pulse" />
             <div className="h-36 md:h-[72px] w-full rounded-md bg-card-border animate-pulse" />
           </>
+        ) : project?.isLoading ? (
+          <>
+            <div className="max-w-[250px] w-full h-8 rounded-md bg-card-border animate-pulse" />
+            <div className="h-36 md:h-[72px] w-full rounded-md bg-card-border animate-pulse" />
+          </>
         ) : (
           <>
             <h4 className="font-bold text-2xl italic">{project.name}</h4>
