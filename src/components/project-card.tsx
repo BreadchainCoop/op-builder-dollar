@@ -21,7 +21,12 @@ export const ProjectCard = ({
   return (
     <Card className="p-4 items-start flex flex-col gap-4">
       <div className="flex flex-col gap-2 w-full">
-        {!project?.name || !project?.description ? (
+        {!project?.id ? (
+          <>
+            <div className="max-w-[250px] w-full h-8 rounded-md bg-card-border animate-pulse" />
+            <div className="h-36 md:h-[72px] w-full rounded-md bg-card-border animate-pulse" />
+          </>
+        ) : project?.isLoading ? (
           <>
             <div className="max-w-[250px] w-full h-8 rounded-md bg-card-border animate-pulse" />
             <div className="h-36 md:h-[72px] w-full rounded-md bg-card-border animate-pulse" />
@@ -29,28 +34,30 @@ export const ProjectCard = ({
         ) : (
           <>
             <h4 className="font-bold text-2xl italic">{project.name}</h4>
-            <span className="italic text-sub-text line-clamp-6 md:line-clamp-3">
-              {project.description}
-            </span>
+            <div className="h-36 md:h-[72px] w-full">
+              <span className="italic text-sub-text line-clamp-6 md:line-clamp-3 block">
+                {project.description}
+              </span>
+            </div>
           </>
         )}
       </div>
       <div className="flex flex-wrap gap-3">
-        <Link href={attestationLink}>
+        <Link href={attestationLink} target="_blank">
           <Button variant="tertrairy" size="sm" className="font-bold">
             View project attestation
             <ArrowSquareOut size={24} />
           </Button>
         </Link>
-        {!websiteLink ? (
-          <div className="w-[250px] min-h-[36px] rounded-md bg-card-border animate-pulse shrink-0" />
-        ) : (
-          <Link href={websiteLink} key={websiteLink}>
+        {websiteLink && websiteLink.trim() !== "" ? (
+          <Link href={websiteLink} target="_blank" key={websiteLink}>
             <Button variant="tertrairy" size="sm" className="font-bold">
               View more on project Website
               <ArrowSquareOut size={24} />
             </Button>
           </Link>
+        ) : (
+          <div className="w-[250px] h-9 shrink-0" />
         )}
       </div>
       <div

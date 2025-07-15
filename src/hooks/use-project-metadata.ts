@@ -36,6 +36,122 @@ interface MetadataResult {
   success: boolean;
 }
 
+// Individual project metadata hook
+export const useIndividualProjectMetadata = (refUid: string) => {
+  const [result] = useQuery({
+    query: ATTESTATION_QUERY,
+    variables: { where: { refUID: { equals: refUid } } },
+    pause: !refUid,
+  });
+
+  const attestation = result?.data?.attestations?.[0];
+
+  const query = useTanstackQuery({
+    queryKey: ["projectMetadata", refUid],
+    enabled: Boolean(attestation),
+    queryFn: async () => {
+      if (!attestation) {
+        throw new Error("Missing attestation");
+      }
+
+      try {
+        const projectData = JSON.parse(
+          attestation.decodedDataJson,
+        ) as ProjectData[];
+
+        const metadataUrl = projectData.find(
+          (data) => data.value.name.toLowerCase() === "metadataurl",
+        )?.value.value;
+
+        if (!metadataUrl) {
+          return {
+            name: "No data available",
+            description: "No data available",
+            socialLinks: { website: [] },
+          } as ProjectMetadata;
+        }
+
+        const response = await fetch(metadataUrl);
+
+        if (!response.ok) {
+          return {
+            name: "No data available",
+            description: "No data available",
+            socialLinks: { website: [] },
+          } as ProjectMetadata;
+        }
+
+        const metadata = await response.json();
+
+        // Validate that metadata has required fields
+        if (metadata?.name && metadata?.description) {
+          return metadata as ProjectMetadata;
+        }
+
+        return {
+          name: "No data available",
+          description: "No data available",
+          socialLinks: { website: [] },
+        } as ProjectMetadata;
+      } catch (error) {
+        console.error(`Error fetching metadata for ${refUid}:`, error);
+        return {
+          name: "No data available",
+          description: "No data available",
+          socialLinks: { website: [] },
+        } as ProjectMetadata;
+      }
+    },
+    // Add retry configuration to prevent infinite loading
+    retry: 1,
+    retryDelay: 1000,
+  });
+
+  // Handle the case where there's no attestation at all
+  if (!refUid) {
+    return {
+      data: {
+        name: "No data available",
+        description: "No data available",
+        socialLinks: { website: [] },
+      } as ProjectMetadata,
+      isLoading: false,
+      isError: false,
+    };
+  }
+
+  // If attestation query is still loading, show loading state
+  if (result.fetching) {
+    return {
+      data: undefined,
+      isLoading: true,
+      isError: false,
+    };
+  }
+
+  // If no attestation found after query completed, return fallback data
+  if (!attestation) {
+    return {
+      data: {
+        name: "No data available",
+        description: "No data available",
+        socialLinks: { website: [] },
+      } as ProjectMetadata,
+      isLoading: false,
+      isError: false,
+    };
+  }
+
+  // Return the React Query result for cases where we have an attestation
+  return {
+    ...query,
+    data: query.data,
+    isLoading: query.isPending,
+    isError: query.isError,
+  };
+};
+
+// Keep the old batch hook for backward compatibility if needed
 export const useProjectMetadata = (projectUID?: string[]) => {
   const [result] = useQuery({
     query: ATTESTATION_QUERY,
@@ -83,6 +199,16 @@ export const useProjectMetadata = (projectUID?: string[]) => {
         projectsMetadataURLs.map(async ({ projectUID, metadataUrl }) => {
           try {
             const response = await fetch(metadataUrl);
+
+            if (!response.ok) {
+              return {
+                projectUID,
+                metadata: null,
+                metadataUrl,
+                success: false,
+              } as MetadataResult;
+            }
+
             const metadata = await response.json();
 
             return {
@@ -124,6 +250,7 @@ export const useProjectMetadata = (projectUID?: string[]) => {
       // Find the first valid metadata for each project
       const validProjects: Map<string, ProjectMetadata> = new Map();
 
+      // First, handle projects that have metadata URLs but failed to fetch valid data
       for (const [projectUID, results] of Object.entries(projectGroups)) {
         // Find the first result with both name and description
         const validResult = results.find(
@@ -132,6 +259,24 @@ export const useProjectMetadata = (projectUID?: string[]) => {
 
         if (validResult?.metadata) {
           validProjects.set(projectUID, validResult.metadata);
+        } else {
+          // If no valid metadata found, create a fallback with "Data not found"
+          validProjects.set(projectUID, {
+            name: "No data available",
+            description: "No data available",
+            socialLinks: { website: [] },
+          });
+        }
+      }
+
+      // Then, handle projects that don't have any metadata URLs at all
+      for (const project of attestations) {
+        if (!validProjects.has(project.refUID)) {
+          validProjects.set(project.refUID, {
+            name: "No data available",
+            description: "No data available",
+            socialLinks: { website: [] },
+          });
         }
       }
 
@@ -143,5 +288,6 @@ export const useProjectMetadata = (projectUID?: string[]) => {
     ...query,
     data: query.data ?? new Map<string, ProjectMetadata>(),
     isLoading: query.isPending || !attestations,
+    isFetching: query.isFetching,
   };
 };

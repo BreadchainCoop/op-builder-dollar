@@ -16,7 +16,7 @@ import { useState } from "react";
 import { useAccount } from "wagmi";
 import { AccountName } from "../account-name";
 import { LoadingTxModal } from "../mint-page-components/loading-tx-modal";
-import { ProjectCard } from "../project-card";
+import { ProjectCardWithMetadata } from "../project-card-with-metadata";
 import { Button } from "../ui/button";
 
 export const EligibleProjects = () => {
@@ -38,7 +38,7 @@ export const EligibleProjects = () => {
       <div className="grid grid-cols-4 md:grid-cols-12 gap-y-4 gap-x-6">
         {projects.map((project) => (
           <div key={project.id} className="col-span-4">
-            <ProjectCard
+            <ProjectCardWithMetadata
               key={project.id}
               project={project}
               className="grid grid-cols-8 w-full gap-2"
@@ -48,7 +48,7 @@ export const EligibleProjects = () => {
                 projectUid={project.id as `0x${string}`}
                 projectName={project.name ?? ""}
               />
-            </ProjectCard>
+            </ProjectCardWithMetadata>
           </div>
         ))}
       </div>
