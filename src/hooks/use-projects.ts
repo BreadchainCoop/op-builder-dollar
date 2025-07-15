@@ -1,5 +1,4 @@
 import type { Project } from "@/lib/types";
-import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { useEligibleProjects } from "./use-eligible-projects";
 import { useProjectCohortData } from "./use-project-cohort-data";
@@ -16,87 +15,54 @@ export function useProjects(): Partial<Project>[] {
   );
 
   const { data: metadatas } = useProjectMetadata(refUids);
-
   const projectsCohortData = useProjectCohortData(recipients);
 
-  const eligibleProjectsKeys = useMemo(
-    () => JSON.stringify(Array.from(eligibleProjects.entries())),
-    [eligibleProjects],
-  );
-  const metadatasKeys = useMemo(
-    () => JSON.stringify(Array.from(metadatas.entries())),
-    [metadatas],
-  );
-  const projectsCohortDataKeys = useMemo(
-    () => JSON.stringify(Array.from(projectsCohortData.entries())),
-    [projectsCohortData],
-  );
+  // Create projects immediately with basic data
+  const projects = useMemo(() => {
+    if (!eligibleProjects) return [];
 
-  const { data: projects } = useQuery({
-    queryKey: [
-      "projects",
-      eligibleProjectsKeys,
-      metadatasKeys,
-      projectsCohortDataKeys,
-    ],
-    queryFn: () => {
-      const newProjects = [] as Partial<Project>[];
+    return eligibleProjects.map((eligibleProject) => {
+      const { id, refUid, recipient } = eligibleProject;
+      const project: Partial<Project> = { id, refUid, recipient };
 
-      if (eligibleProjects) {
-        for (const eligibleProject of eligibleProjects) {
-          const { id, refUid, recipient } = eligibleProject;
-          newProjects.push({ id, refUid, recipient });
-        }
-
-        if (metadatas && newProjects.length) {
-          for (const project of newProjects) {
-            const { refUid } = project;
-            const metadata = metadatas.get(refUid ?? "");
-
-            if (metadata) {
-              const { name, description, socialLinks } = metadata;
-              Object.assign(project, { name, description, socialLinks });
-            }
-          }
-        }
-
-        if (projectsCohortData) {
-          for (const [id, projectCohortData] of projectsCohortData) {
-            const idx: number = newProjects.findIndex(
-              (newProject) => newProject.recipient === id,
-            );
-            const {
-              isCohortMember,
-              shareOfYield,
-              membershipStartDate,
-              membershipExpirationDate,
-              membershipExpirationTimeLeft,
-              endorsers,
-            } = projectCohortData;
-            if (idx !== -1)
-              newProjects[idx] = {
-                ...newProjects[idx],
-                isCohortMember,
-                shareOfYield,
-                membershipStartDate,
-                membershipExpirationDate,
-                membershipExpirationTimeLeft,
-                endorsers,
-              };
-          }
-        }
+      // Add metadata if available
+      const metadata = metadatas?.get(refUid ?? "");
+      if (metadata) {
+        const { name, description, socialLinks } = metadata;
+        Object.assign(project, { name, description, socialLinks });
+      } else {
+        // Apply fallback data if metadata doesn't exist
+        Object.assign(project, {
+          name: "No data available",
+          description: "No data available",
+          socialLinks: { website: [] },
+        });
       }
 
-      const projectsWithNames = newProjects.filter(
-        (p) => p.name && p.name.trim() !== "",
-      );
-      console.log(
-        `[DEBUG] useProjects: Final projects with names: ${projectsWithNames.length}/${newProjects.length}`,
-      );
+      // Add cohort data if available
+      const cohortData = projectsCohortData.get(recipient);
+      if (cohortData) {
+        const {
+          isCohortMember,
+          shareOfYield,
+          membershipStartDate,
+          membershipExpirationDate,
+          membershipExpirationTimeLeft,
+          endorsers,
+        } = cohortData;
+        Object.assign(project, {
+          isCohortMember,
+          shareOfYield,
+          membershipStartDate,
+          membershipExpirationDate,
+          membershipExpirationTimeLeft,
+          endorsers,
+        });
+      }
 
-      return newProjects as Partial<Project>[];
-    },
-  });
+      return project;
+    });
+  }, [eligibleProjects, metadatas, projectsCohortData]);
 
-  return projects ?? [];
+  return projects;
 }

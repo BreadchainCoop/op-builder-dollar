@@ -124,6 +124,7 @@ export const useProjectMetadata = (projectUID?: string[]) => {
       // Find the first valid metadata for each project
       const validProjects: Map<string, ProjectMetadata> = new Map();
 
+      // First, handle projects that have metadata URLs but failed to fetch valid data
       for (const [projectUID, results] of Object.entries(projectGroups)) {
         // Find the first result with both name and description
         const validResult = results.find(
@@ -132,6 +133,24 @@ export const useProjectMetadata = (projectUID?: string[]) => {
 
         if (validResult?.metadata) {
           validProjects.set(projectUID, validResult.metadata);
+        } else {
+          // If no valid metadata found, create a fallback with "Data not found"
+          validProjects.set(projectUID, {
+            name: "No data available",
+            description: "No data available",
+            socialLinks: { website: [] },
+          });
+        }
+      }
+
+      // Then, handle projects that don't have any metadata URLs at all
+      for (const project of attestations) {
+        if (!validProjects.has(project.refUID)) {
+          validProjects.set(project.refUID, {
+            name: "No data available",
+            description: "No data available",
+            socialLinks: { website: [] },
+          });
         }
       }
 
@@ -143,5 +162,6 @@ export const useProjectMetadata = (projectUID?: string[]) => {
     ...query,
     data: query.data ?? new Map<string, ProjectMetadata>(),
     isLoading: query.isPending || !attestations,
+    isFetching: query.isFetching,
   };
 };

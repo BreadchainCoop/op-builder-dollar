@@ -22,16 +22,11 @@ import { Button } from "../ui/button";
 export const EligibleProjects = () => {
   const projects = useProjects();
 
-  // Filter out projects that don't have a name
-  const projectsWithNames = projects.filter(
-    (project) => project.name && project.name.trim() !== "",
-  );
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4">
         <h2 className="font-bold text-2xl">
-          PROJECTS ELIGIBLE FOR COHORT ({projectsWithNames.length})
+          PROJECTS ELIGIBLE FOR COHORT ({projects.length})
         </h2>
         <span className="text-sub-text text-lg">
           This list includes projects eligible for endorsemests by Optimism
@@ -41,7 +36,7 @@ export const EligibleProjects = () => {
         </span>
       </div>
       <div className="grid grid-cols-4 md:grid-cols-12 gap-y-4 gap-x-6">
-        {projectsWithNames.map((project) => (
+        {projects.map((project) => (
           <div key={project.id} className="col-span-4">
             <ProjectCard
               key={project.id}
