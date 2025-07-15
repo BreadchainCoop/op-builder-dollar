@@ -43,14 +43,14 @@ export const ProjectCard = ({
         )}
       </div>
       <div className="flex flex-wrap gap-3">
-        <Link href={attestationLink}>
+        <Link href={attestationLink} target="_blank">
           <Button variant="tertrairy" size="sm" className="font-bold">
             View project attestation
             <ArrowSquareOut size={24} />
           </Button>
         </Link>
         {websiteLink && websiteLink.trim() !== "" ? (
-          <Link href={websiteLink} key={websiteLink}>
+          <Link href={websiteLink} target="_blank" key={websiteLink}>
             <Button variant="tertrairy" size="sm" className="font-bold">
               View more on project Website
               <ArrowSquareOut size={24} />
