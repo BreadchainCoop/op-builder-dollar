@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "OP Builders Dollar",
     description: "Optimistic Builders Dollar",
-    url: "http://obdollar.xyz/",
+    url: "https://obdollar.xyz/",
     siteName: "OP Builders Dollar",
     images: [
       {
@@ -22,6 +22,12 @@ export const metadata: Metadata = {
     ],
     locale: "en_US",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "OP Builders Dollar",
+    description: "Optimistic Builders Dollar",
+    images: ["https://obdollar.xyz/images/preview.png"],
   },
 };
 
