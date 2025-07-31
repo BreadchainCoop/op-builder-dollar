@@ -7,6 +7,22 @@ import Content from "./Content";
 export const metadata: Metadata = {
   title: "OP Builders Dollar",
   description: "Optimistic Builders Dollar",
+  openGraph: {
+    title: "OP Builders Dollar",
+    description: "Optimistic Builders Dollar",
+    url: "http://obdollar.xyz/",
+    siteName: "OP Builders Dollar",
+    images: [
+      {
+        url: "https://obdollar.xyz/images/preview.png",
+        width: 800,
+        height: 600,
+        alt: "Optimistic Builders Dollar",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
 };
 
 const rubik = Rubik({
